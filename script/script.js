@@ -66,10 +66,24 @@ function basic24(permutations) {
   return false
 }
 
-function parentMid(permutations) {
+function parentDouble(permutations) {
   for (let i = 0; i < permutations.length; i++) {
     for (let j = 0; j < opersArray.length; j++) {
       var temp = `(${permutations[i][0]}${opersArray[j][0]}${permutations[i][1]})${opersArray[j][1]}(${permutations[i][2]}${opersArray[j][2]}${permutations[i][3]})`;
+      if (eval(temp) === 24) {
+        console.log(temp);
+        return true;
+      }
+    }
+  }
+
+  return false
+}
+
+function parentMid(permutations) {
+  for (let i = 0; i < permutations.length; i++) {
+    for (let j = 0; j < opersArray.length; j++) {
+      var temp = `${permutations[i][0]}${opersArray[j][0]}(${permutations[i][1]}${opersArray[j][1]}${permutations[i][2]})${opersArray[j][2]}${permutations[i][3]}`;
       if (eval(temp) === 24) {
         console.log(temp);
         return true;
@@ -114,5 +128,5 @@ function parentRight(permutations) {
 
 function makes24(array) {
   var perms = perm(array);
-  return basic24(perms) || parentLeft(perms) || parentMid(perms) || parentRight(perms);
+  return basic24(perms) || parentLeft(perms) || parentMid(perms) || parentRight(perms) || parentDouble(perms);
 }
