@@ -1,7 +1,43 @@
+// DOM Elements
+
+var first = document.getElementById("first");
+var second = document.getElementById("second");
+var third = document.getElementById("third");
+var fourth = document.getElementById("fourth");
+
+var plus = document.getElementById("plus");
+var minus = document.getElementById("minus");
+var times = document.getElementById("times");
+var divide = document.getElementById("divide");
+
+var cards = [first, second, third, fourth];
+var operators = [plus, minus, times, divide];
+
+for (let i = 0; i < cards.length; i++) {
+  cards[i].addEventListener("click", clickHandler);
+}
+
+for (let i = 0; i < operators.length; i++) {
+  operators[i].addEventListener("click", clickHandler);
+}
+
+
+
 // Base Objects
 
 var opers = ["+", "-", "*", "/"];
 opersArray = permRep(opers);
+
+var data = {
+  currentSelection: null,
+  previousSelection: null,
+  total: 0,
+  cardState: genNumArray()
+}
+
+for (let i = 0; i < cards.length; i++) {
+  cards[i].innerText = data.cardState[i];
+}
 
 
 
@@ -120,6 +156,105 @@ function parentRight(permutations) {
   }
 
   return false
+}
+
+function endState(gameState) {
+  var counter = 0;
+  for (let i = 0; i < gameState.length; i++) {
+    if (gameState[i] === 0) {
+      counter++;
+    }
+  }
+
+  return counter === 3;
+}
+
+function checkWin() {
+  if (endState(data.cardState)) {
+    var total = 0;
+    for (let i = 0; i < data.cardState.length; i++) {
+      total += data.cardState[i];
+    }
+
+    if (total === 24) {
+      alert("You won!");
+    } else {
+      alert("You lost!");
+    }
+  }
+}
+
+
+
+// Event Listeners
+
+function clickHandler(event) {
+  var currentTarget = event.target;
+  if (currentTarget.classList.contains("selected")) {
+    // Current target is selected
+    data.currentSelection = null;
+    currentTarget.classList.toggle("selected");
+  } else {
+    // Current target is not selected
+    if (data.previousSelection === null) {
+      // There is no previous selection
+      if (data.currentSelection === null) {
+        // There is no current selection
+        if (currentTarget.classList[0] === "operator") {
+          // An operator is selected before selecting a number
+          alert("Please select a number first");
+          // currentTarget.classList.toggle("selected");
+        } else {
+          // A number is the first element to be selected
+          data.currentSelection = currentTarget;
+          currentTarget.classList.toggle("selected");
+        }
+      } else {
+        // There is a current selection
+        if (data.currentSelection.classList[0] === currentTarget.classList[0]) {
+          // Current target is the same class as the previously selected target
+          if (currentTarget.classList[0] === "card") {
+            // Another number is selected after selecting a number
+            alert("Choose an operator");
+          } else {
+            // Another operator is selected after selecting an operator
+            alert("Choose another number");
+          }
+        } else {
+          // Current target is not the same as the previously selected target
+          data.previousSelection = data.currentSelection;
+          data.currentSelection = currentTarget;
+          currentTarget.classList.toggle("selected");
+        }
+      }
+    } else {
+      // There is a previous selection
+      if (data.currentSelection === null) {
+        // There is no current selection
+        if (currentTarget.classList[0] === "card") {
+          alert("Please choose an operator");
+        }
+      } else {
+        // There is a current selection
+        if (currentTarget.classList[0] === "operator") {
+          alert("Please choose another number");
+        } else {
+          data.total = eval(`${data.previousSelection.innerText} ${opers[operators.indexOf(data.currentSelection)]} ${currentTarget.innerText}`);
+          data.previousSelection.style.visibility = "hidden";
+          currentTarget.innerText = data.total;
+          data.currentSelection.classList.toggle("selected");
+
+          data.cardState[cards.indexOf(data.previousSelection)] = 0;
+          data.cardState[cards.indexOf(currentTarget)] = data.total;
+
+          data.previousSelection = null;
+          data.currentSelection = null;
+
+          checkWin();
+        }
+      }
+    }
+  }
 }
 
 
