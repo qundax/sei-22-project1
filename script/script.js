@@ -1,5 +1,7 @@
 // DOM Elements
 
+var score = document.getElementById("score");
+
 var first = document.getElementById("first");
 var second = document.getElementById("second");
 var third = document.getElementById("third");
@@ -21,6 +23,14 @@ for (let i = 0; i < operators.length; i++) {
   operators[i].addEventListener("click", clickHandler);
 }
 
+var newGame = document.getElementById("new-game");
+var undo = document.getElementById("undo");
+var skipButton = document.getElementById("skip");
+var noSolution = document.getElementById("no-solution")
+
+newGame.addEventListener("click", startNewGame);
+undo.addEventListener("click", undoGame);
+
 
 
 // Base Objects
@@ -28,16 +38,17 @@ for (let i = 0; i < operators.length; i++) {
 var opers = ["+", "-", "*", "/"];
 opersArray = permRep(opers);
 
+var tempState = genNumArray();
+
 var data = {
   currentSelection: null,
   previousSelection: null,
   total: 0,
-  cardState: genNumArray()
+  originalState: tempState.slice(0),
+  cardState: tempState.slice(0)
 }
 
-for (let i = 0; i < cards.length; i++) {
-  cards[i].innerText = data.cardState[i];
-}
+populateState();
 
 
 
@@ -86,20 +97,6 @@ function genNumArray() {
   }
 
   return output;
-}
-
-function basic24(permutations) {
-  for (let i = 0; i < permutations.length; i++) {
-    for (let j = 0; j < opersArray.length; j++) {
-      var temp = `${permutations[i][0]}${opersArray[j][0]}${permutations[i][1]}${opersArray[j][1]}${permutations[i][2]}${opersArray[j][2]}${permutations[i][3]}`;
-      if (eval(temp) === 24) {
-        console.log(temp);
-        return true;
-      }
-    }
-  }
-
-  return false
 }
 
 function parentDouble(permutations) {
@@ -158,6 +155,12 @@ function parentRight(permutations) {
   return false
 }
 
+function populateState() {
+  for (let i = 0; i < cards.length; i++) {
+    cards[i].innerText = data.originalState[i];
+  }
+}
+
 function endState(gameState) {
   var counter = 0;
   for (let i = 0; i < gameState.length; i++) {
@@ -177,11 +180,46 @@ function checkWin() {
     }
 
     if (total === 24) {
-      alert("You won!");
+      setTimeout(function() {
+        raiseScore();
+        alert("You won!");
+        startNewGame();
+      }, 1500)
     } else {
       alert("You lost!");
     }
   }
+}
+
+function newState() {
+  tempState = genNumArray();
+  data.originalState = tempState.slice(0);
+  data.cardState = tempState.slice(0);
+}
+
+function resetCards() {
+  for (let i = 0; i < cards.length; i++) {
+    cards[i].style.visibility = "visible";
+    cards[i].classList.remove("selected");
+  }
+}
+
+function resetOperators() {
+  for (let i = 0; i < operators.length; i++) {
+    operators[i].classList.remove("selected");
+  }
+}
+
+function raiseScore() {
+  var total = parseInt(score.innerText);
+  total++;
+  score.innerText = total;
+}
+
+function dropScore() {
+  var total = parseInt(score.innerText);
+  total--;
+  score.innerText = total;
 }
 
 
@@ -257,11 +295,30 @@ function clickHandler(event) {
   }
 }
 
+function startNewGame(event) {
+  data.currentSelection = null;
+  data.previousSelection = null;
+  data.total = 0;
+  resetCards();
+  resetOperators();
+  newState();
+  populateState();
+}
+
+function undoGame(event) {
+  data.currentSelection = null;
+  data.previousSelection = null;
+  data.total = 0;
+  resetCards();
+  resetOperators();
+  populateState();
+}
+
 
 
 // Main functions
 
 function makes24(array) {
   var perms = perm(array);
-  return basic24(perms) || parentLeft(perms) || parentMid(perms) || parentRight(perms) || parentDouble(perms);
+  return parentLeft(perms) || parentMid(perms) || parentRight(perms) || parentDouble(perms);
 }
