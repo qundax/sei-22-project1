@@ -26,10 +26,10 @@ for (let i = 0; i < operators.length; i++) {
 var newGame = document.getElementById("new-game");
 var undo = document.getElementById("undo");
 var skipButton = document.getElementById("skip");
-var noSolution = document.getElementById("no-solution")
 
 newGame.addEventListener("click", startNewGame);
-undo.addEventListener("click", undoGame);
+undo.addEventListener("click", undoRound);
+skip.addEventListener("click", skipRound);
 
 
 
@@ -92,8 +92,10 @@ function permRep(array) {
 function genNumArray() {
   output = [];
 
-  for (let i = 0; i < 4; i++) {
-    output.push(Math.ceil(Math.random() * 9));
+  while (!makes24(output)) {
+    for (let i = 0; i < 4; i++) {
+      output.push(Math.ceil(Math.random() * 9));
+    }
   }
 
   return output;
@@ -183,8 +185,8 @@ function checkWin() {
       setTimeout(function() {
         raiseScore();
         alert("You won!");
-        startNewGame();
-      }, 1500)
+        newRound();
+      }, 1000)
     } else {
       alert("You lost!");
     }
@@ -216,10 +218,18 @@ function raiseScore() {
   score.innerText = total;
 }
 
-function dropScore() {
-  var total = parseInt(score.innerText);
-  total--;
-  score.innerText = total;
+function resetScore() {
+  score.innerText = 0;
+}
+
+function newRound() {
+  data.currentSelection = null;
+  data.previousSelection = null;
+  data.total = 0;
+  resetCards();
+  resetOperators();
+  newState();
+  populateState();
 }
 
 
@@ -230,8 +240,15 @@ function clickHandler(event) {
   var currentTarget = event.target;
   if (currentTarget.classList.contains("selected")) {
     // Current target is selected
-    data.currentSelection = null;
-    currentTarget.classList.toggle("selected");
+    if (data.previousSelection === null) {
+      // Fresh selection
+      data.currentSelection = null;
+      currentTarget.classList.toggle("selected");
+    } else {
+      // Click on the first number that was selected
+      data.previousSelection = null;
+      currentTarget.classList.toggle("selected");
+    }
   } else {
     // Current target is not selected
     if (data.previousSelection === null) {
@@ -271,6 +288,9 @@ function clickHandler(event) {
         // There is no current selection
         if (currentTarget.classList[0] === "card") {
           alert("Please choose an operator");
+        } else if (currentTarget.classList[0] === "operator") {
+          data.currentSelection = currentTarget;
+          data.currentSelection.classList.toggle("selected");
         }
       } else {
         // There is a current selection
@@ -300,17 +320,28 @@ function startNewGame(event) {
   data.previousSelection = null;
   data.total = 0;
   resetCards();
+  resetScore();
   resetOperators();
   newState();
   populateState();
 }
 
-function undoGame(event) {
+function undoRound(event) {
   data.currentSelection = null;
   data.previousSelection = null;
   data.total = 0;
   resetCards();
   resetOperators();
+  populateState();
+}
+
+function skipRound(event) {
+  data.currentSelection = null;
+  data.previousSelection = null;
+  data.total = 0;
+  resetCards();
+  resetOperators();
+  newState();
   populateState();
 }
 
