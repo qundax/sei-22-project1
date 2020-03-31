@@ -1,5 +1,8 @@
 // DOM Elements
 
+var time = document.getElementById("time");
+var chosenTime = parseInt(window.location.search.substring(6));
+
 var score = document.getElementById("score");
 
 var first = document.getElementById("first");
@@ -27,7 +30,8 @@ var newGame = document.getElementById("new-game");
 var undo = document.getElementById("undo");
 var skipButton = document.getElementById("skip");
 
-newGame.addEventListener("click", startNewGame);
+// newGame.addEventListener("click", startNewGame);
+newGame.addEventListener("click", function() {window.location.href = "timer.html"});
 undo.addEventListener("click", undoRound);
 skip.addEventListener("click", skipRound);
 
@@ -46,13 +50,28 @@ var data = {
   total: 0,
   originalState: tempState.slice(0),
   cardState: tempState.slice(0)
-}
+};
 
 populateState();
 
 
 
 // Functions
+// Countdown Timer
+
+var countdownTimer = setInterval(function() {
+  if (chosenTime === 0) {
+    setTimeout(function() {alert(`Game Over! You scored: ${score.innerText} points`)}, 1);
+    window.location.href = "../index.html";
+  }
+
+  time.innerText = chosenTime;
+  chosenTime--;
+
+}, 1000);
+
+
+
 // Helper Functions
 
 function perm(array) {
@@ -184,11 +203,11 @@ function checkWin() {
     if (total === 24) {
       setTimeout(function() {
         raiseScore();
-        alert("You won!");
+        alert("You scored a point!");
         newRound();
-      }, 1000)
+      }, 500)
     } else {
-      alert("You lost!");
+      alert("Try again");
     }
   }
 }
@@ -245,9 +264,14 @@ function clickHandler(event) {
       data.currentSelection = null;
       currentTarget.classList.toggle("selected");
     } else {
-      // Click on the first number that was selected
-      data.previousSelection = null;
-      currentTarget.classList.toggle("selected");
+      if (currentTarget.classList[0] === "operator") {
+        data.currentSelection = data.previousSelection;
+        data.previousSelection = null;
+        currentTarget.classList.toggle("selected");
+      } else {
+        data.previousSelection = null;
+        currentTarget.classList.toggle("selected");
+      }
     }
   } else {
     // Current target is not selected
@@ -315,16 +339,16 @@ function clickHandler(event) {
   }
 }
 
-function startNewGame(event) {
-  data.currentSelection = null;
-  data.previousSelection = null;
-  data.total = 0;
-  resetCards();
-  resetScore();
-  resetOperators();
-  newState();
-  populateState();
-}
+// function startNewGame(event) {
+//   data.currentSelection = null;
+//   data.previousSelection = null;
+//   data.total = 0;
+//   resetCards();
+//   resetScore();
+//   resetOperators();
+//   newState();
+//   populateState();
+// }
 
 function undoRound(event) {
   data.currentSelection = null;
